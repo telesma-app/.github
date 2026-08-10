@@ -35,18 +35,26 @@ omitted.
 
 ```mermaid
 flowchart TB
-    telesma["telesma<br/>desktop UI and Wails integration"]
-    kit["kit<br/>device lifecycle and application workflows"]
-    mds["mds<br/>metadata download and verification"]
+    telesma["`telesma
+desktop UI and Wails integration`"]
+    kit["`kit
+device lifecycle and application workflows`"]
+    mds["`mds
+metadata download and verification`"]
 
     subgraph ctapStack["ctap · layered protocol stack"]
         direction TB
 
-        authenticator["authenticator<br/>stateful device workflows"]
-        client["client<br/>individual CTAP commands"]
-        backends["backend/*<br/>enumeration and endpoint opening"]
-        transports["transport/*<br/>CTAPHID and APDU bindings"]
-        types["protocol and supporting packages<br/>wire types · WebAuthn · extensions · crypto"]
+        authenticator["`authenticator
+stateful device workflows`"]
+        client["`client
+individual CTAP commands`"]
+        backends["`backend/*
+enumeration and endpoint opening`"]
+        transports["`transport/*
+CTAPHID and APDU bindings`"]
+        types["`protocol and supporting packages
+wire types · WebAuthn · extensions · crypto`"]
 
         authenticator --> client
         authenticator --> backends
@@ -57,8 +65,10 @@ flowchart TB
         transports --> types
     end
 
-    integrations["device integrations<br/>token2 · yubico"]
-    hostIO["host I/O<br/>hid · windows-proxy · pcsc · iso7816"]
+    integrations["`device integrations
+token2 · yubico`"]
+    hostIO["`host I/O
+hid · windows-proxy · pcsc · iso7816`"]
 
     telesma --> kit
     telesma --> mds

@@ -4,10 +4,10 @@
 
 # Telesma
 
-Telesma is an open-source workbench and Go toolkit for inspecting, managing,
-testing, and integrating local FIDO2 authenticators. The project covers CTAP
-2.0–2.3, CTAPHID, ISO/IEC 7816-4, PC/SC, the Windows WebAuthn API, and the FIDO
-Metadata Service.
+Telesma is an open-source desktop workbench for inspecting and managing local
+FIDO2 authenticators, with a Go toolkit for FIDO2 and PIV applications. The
+libraries cover CTAP 2.0–2.3, PIV, CTAPHID, ISO/IEC 7816-4, PC/SC, the Windows
+WebAuthn API, and the FIDO Metadata Service.
 
 ## Projects
 
@@ -19,9 +19,10 @@ Metadata Service.
 | [`kit`](https://github.com/telesma-app/kit) | Reusable discovery, session, operation, interaction, and safety workflows for authenticator applications. |
 | [`mds`](https://github.com/telesma-app/mds) | Client for downloading and verifying FIDO Metadata Service (MDS3) data. |
 | [`ctap`](https://github.com/telesma-app/ctap) | Layered CTAP 2.0–2.3 stack with stateful workflows, a command client, backend adapters, transports, and wire types. |
-| [`iso7816`](https://github.com/telesma-app/iso7816) | Transport-independent ISO/IEC 7816-4 command and response APDUs. |
-| [`token2`](https://github.com/telesma-app/token2) | Token2 device support over PC/SC, USB HID feature reports, and CTAPHID. |
-| [`yubico`](https://github.com/telesma-app/yubico) | Yubico-specific device information and identity support. |
+| [`piv`](https://github.com/telesma-app/piv) | PIV smart-card commands and workflows for certificates, PINs, key operations, and secure messaging over ISO 7816 and PC/SC. |
+| [`iso7816`](https://github.com/telesma-app/iso7816) | Transport-independent ISO/IEC 7816-4 command and response APDUs, with optional GlobalPlatform SCP11b secure channels. |
+| [`token2`](https://github.com/telesma-app/token2) | Token2 device information over PC/SC, USB HID feature reports, and CTAPHID; reader settings and PIV extensions. |
+| [`yubico`](https://github.com/telesma-app/yubico) | Yubico management information and model identification over PC/SC and CTAPHID, plus PIV extensions. |
 | [`winhello`](https://github.com/telesma-app/winhello) | cgo-free Go bindings for the Windows WebAuthn API and Windows Hello. |
 | [`hid`](https://github.com/telesma-app/hid) | Cross-platform, cgo-free access to HID devices. |
 | [`pcsc`](https://github.com/telesma-app/pcsc) | Minimal, cgo-free PC/SC access for smart cards and security tokens. |
@@ -29,9 +30,14 @@ Metadata Service.
 
 ## Architecture
 
-The diagram follows the primary runtime path. Arrows point from a consumer to
-the layer it uses; independent projects and secondary package imports are
-omitted.
+The diagram shows the desktop runtime and the independent PIV stack. Arrows
+point from a consumer to a dependency; standalone tools and secondary package
+imports are omitted.
+
+`kit` uses vendor device information for FIDO2 discovery and identity. PIV
+workflows use `piv` directly; `token2/piv` and `yubico/piv` extend its card
+sessions with slot metadata, attestation, key import and generation with
+PIN/touch policies, and administration commands.
 
 ```mermaid
 flowchart TB
@@ -65,9 +71,13 @@ wire types · WebAuthn · extensions · crypto`"]
         transports --> types
     end
 
-    integrations["`device integrations
+    integrations["`vendor device information
 token2 · yubico`"]
-    hostIO["`host I/O
+    pivExtensions["`PIV vendor extensions
+token2/piv · yubico/piv`"]
+    piv["`piv
+card workflows · commands · secure messaging`"]
+    hostIO["`host I/O and APDU support
 hid · windows-proxy · pcsc · iso7816`"]
 
     telesma --> kit
@@ -80,6 +90,8 @@ hid · windows-proxy · pcsc · iso7816`"]
     mds --> types
     integrations --> transports
     integrations --> hostIO
+    pivExtensions --> piv
+    piv -->|ISO 7816 and PC/SC| hostIO
     backends --> hostIO
     transports --> hostIO
 ```
